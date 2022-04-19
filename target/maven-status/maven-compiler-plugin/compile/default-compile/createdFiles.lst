@@ -1,2 +1,2 @@
-agents/ConveyorAgent.class
-agents/ConveyorAgent$WaitPingAndReplyBehaviour.class
+agents\ConveyorAgent$WaitPingAndReplyBehaviour.class
+agents\ConveyorAgent.class
