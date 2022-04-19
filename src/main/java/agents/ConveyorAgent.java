@@ -24,16 +24,21 @@
 
 package agents;
 
+import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.util.Logger;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,34 +71,71 @@ public class ConveyorAgent extends Agent{
         }
 
         public void action() {
-            ACLMessage  msg = myAgent.receive();
+            ACLMessage msg = myAgent.receive();
             JSONParser parser = new JSONParser();
 
-            if(msg != null){
+            if (msg != null){
                 ACLMessage reply = msg.createReply();
 
-                if(msg.getPerformative()== ACLMessage.INFORM){
+                if (msg.getPerformative() == ACLMessage.REQUEST){
                     String content = msg.getContent();
-
-                    if((content != null) && (content.contains("get_neighbours"))){
+                    //Replies with its neighbours
+                    if ((content != null) && (content.contains("get_neighbours"))) {
                         JSONObject replyObject = new JSONObject();
-
                         replyObject.put("Neighbours", neighbours);
-                        myLogger.log(Logger.INFO, "Agent " + getLocalName()+" - Neighbours: " + replyObject.toString());
+                        myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Neighbours: " + replyObject.toString());
 
                         reply.setPerformative(ACLMessage.INFORM);
                         reply.setContent(replyObject.toString());
                     }
+                    //Load the pallet on the conveyor
+                    else if((content!= null) && content.contains("load")){
+                        if(conveyor_status == Status.Busy){
+                            reply.setPerformative(ACLMessage.FAILURE);
+                            reply.setContent("Conveyor busy, cannot load!");
 
+                            myLogger.log(Logger.WARNING, "Agent " + getLocalName() + " - Busy, cannot load");
+                        }
+                        else if(conveyor_status == Status.Down){
+                            reply.setPerformative(ACLMessage.FAILURE);
+                            reply.setContent("Conveyor down, cannot load!");
+
+                            myLogger.log(Logger.WARNING, "Agent " + getLocalName() + " - Down, cannot load");
+                        }
+                        else{
+                            //Load the pallet, update the status
+                            conveyor_status = Status.Busy;
+                            reply.setPerformative(ACLMessage.AGREE);
+                            reply.setContent("Pallet loaded");
+
+                            myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Pallet loaded");
+                        }
+                    }
+                    //Transfer the pallet to the next conveyor ( Task 1 only)
+                    else if((content!= null) && content.contains("transfer_next")){
+
+                    }
+                }
+                else if(msg.getPerformative() == ACLMessage.CFP){
+                    try {
+                        String content = msg.getContent();
+                        JSONParser jsonParser = new JSONParser();
+                        JSONObject jsonObject = (JSONObject) jsonParser.parse(content);
+
+                        addBehaviour(new BestPath(jsonObject));
+                        myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Received call for proposal: " + jsonObject.toString());
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
 
                 }
                 else {
-                    myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected message ["+ACLMessage.getPerformative(msg.getPerformative())+"] received from "+msg.getSender().getLocalName());
+                    myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Unexpected message [" + ACLMessage.getPerformative(msg.getPerformative()) + "] received from "+msg.getSender().getLocalName());
                     reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
-                    reply.setContent("( (Unexpected-act "+ACLMessage.getPerformative(msg.getPerformative())+") )");
+                    reply.setContent("( (Unexpected-act " + ACLMessage.getPerformative(msg.getPerformative()) + ") )");
                 }
                 send(reply);
-            }
+            }   // if message != null
             else {
                 block();
             }
@@ -130,6 +172,76 @@ public class ConveyorAgent extends Agent{
             for (Object n : args) {
                 neighbours.add((String) n);
             }
+        }
+    }
+
+
+    // behaviour to ask look for the best path
+    private class BestPath extends Behaviour {
+        JSONObject msg; //
+        private boolean isDone = false;
+
+        public BestPath(JSONObject s) {
+            msg = s;
+        };
+
+        public void action() {
+            // I am source
+            if (myAgent.getLocalName() == msg.get("source")) {
+                // if the viaPoints array is empty, we start
+                // otherwise we are done
+                // start timer
+                long timeout = 3000;
+                addBehaviour(new WakerBehaviour(myAgent, timeout) {
+                    @Override
+                    protected void onWake() {
+
+                    }
+                });
+                // propagate message to neighbours
+            }
+            // I am destination
+            else if (myAgent.getLocalName() == msg.get("destination")) {
+                // send full list to source
+                // create message
+                ACLMessage fullList = new ACLMessage(ACLMessage.PROPAGATE);
+                // find target
+                AID targetAID = new AID((String) msg.get("source"), AID.ISLOCALNAME);
+                // add receiver to message
+                fullList.addReceiver(targetAID);
+                // set the content
+                fullList.setContent(msg.toString());
+                // send the message
+                myAgent.send(fullList);
+                // log
+                myLogger.log(Logger.INFO, myAgent.getLocalName() + " - I am the destination. Sending the full list to source.");
+                // done
+                isDone = true;
+            }
+            // else
+            else {
+                // add myself to viaPoints array
+                ((JSONArray) msg.get("viaPoints")).add(myAgent.getLocalName());
+                // propagate the message
+                ACLMessage propagateMsg = new ACLMessage(ACLMessage.PROPAGATE);
+                // add receivers to message
+                for (String n : neighbours) {
+                    propagateMsg.addReceiver(new AID(n, AID.ISLOCALNAME));
+                }
+                // set the content
+                propagateMsg.setContent(msg.toString());
+                // send the message
+                myAgent.send(propagateMsg);
+                // log
+                myLogger.log(Logger.INFO, myAgent.getLocalName() + " - Adding myself to the list and propagating the message.");
+                // done
+                isDone = true;
+            }
+        }
+
+
+        public boolean done() {
+            return isDone;
         }
     }
 }

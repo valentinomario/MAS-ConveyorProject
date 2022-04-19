@@ -1,3 +1,4 @@
+agents\ConveyorAgent$BestPath.class
 agents\ConveyorAgent.class
 agents\ConveyorAgent$Status.class
 agents\ConveyorAgent$TransferControlBehaviour.class
