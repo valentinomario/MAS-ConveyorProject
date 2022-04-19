@@ -24,13 +24,13 @@
 
 package agents;
 
-import jade.core.*;
-import jade.core.behaviours.*;
-import jade.lang.acl.ACLMessage;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
+import jade.lang.acl.ACLMessage;
 import jade.util.Logger;
 
 /**
@@ -42,7 +42,7 @@ import jade.util.Logger;
  * @author Tiziana Trucco - CSELT S.p.A.
  * @version  $Date: 2010-04-08 13:08:55 +0200 (gio, 08 apr 2010) $ $Revision: 6297 $
  */
-public class PingAgent extends Agent{
+public class ConveyorAgent extends Agent{
 
     private Logger myLogger = Logger.getMyLogger(getClass().getName());
 
