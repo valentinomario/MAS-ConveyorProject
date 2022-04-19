@@ -32,17 +32,18 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.util.Logger;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.LogRecord;
 
 /**
- * This agent implements a simple Ping Agent that registers itself with the DF and
- * then waits for ACLMessages.
- * If  a REQUEST message is received containing the string "ping" within the content
- * then it replies with an INFORM message whose content will be the string "pong".
+ * This agent implements a model of a conveyor belt. It knows the following conveyor(s).
+ * The agent is capable of driving a package through a network of conveyor belts.
  *
- * @author Tiziana Trucco - CSELT S.p.A.
+ * @author Luigi Catello, Mario Valentino
  * @version  $Date: 2010-04-08 13:08:55 +0200 (gio, 08 apr 2010) $ $Revision: 6297 $
  */
 
@@ -66,14 +67,23 @@ public class ConveyorAgent extends Agent{
 
         public void action() {
             ACLMessage  msg = myAgent.receive();
-            //TODO: come lo mettiamo lo stato?
+            JSONParser parser = new JSONParser();
 
             if(msg != null){
                 ACLMessage reply = msg.createReply();
 
-                if(msg.getPerformative()== ACLMessage.INFORM){  //Inform?
+                if(msg.getPerformative()== ACLMessage.INFORM){
                     String content = msg.getContent();
-                    
+
+                    if((content != null) && (content.contains("get_neighbours"))){
+                        JSONObject replyObject = new JSONObject();
+
+                        replyObject.put("Neighbours", neighbours);
+                        myLogger.log(Logger.INFO, "Agent " + getLocalName()+" - Neighbours: " + replyObject.toString());
+
+                        reply.setPerformative(ACLMessage.INFORM);
+                        reply.setContent(replyObject.toString());
+                    }
 
 
                 }
@@ -107,8 +117,19 @@ public class ConveyorAgent extends Agent{
             addBehaviour(ConveyorBehaviour);
 
         } catch (FIPAException e) {
-            myLogger.log(Logger.SEVERE, "Agent "+getLocalName()+" - Cannot register with DF", e);
+            myLogger.log(Logger.SEVERE, "Agent " + getLocalName()+" - Cannot register with DF", e);
             doDelete();
+        }
+
+        // agent starts as idling
+        conveyor_status = Status.Idle;
+
+        // getting the neighbours from the args
+        Object[] args = getArguments();
+        if (args != null && args.length > 0) {
+            for (Object n : args) {
+                neighbours.add((String) n);
+            }
         }
     }
 }
