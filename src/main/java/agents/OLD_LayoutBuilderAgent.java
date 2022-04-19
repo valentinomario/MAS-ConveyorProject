@@ -46,7 +46,7 @@ import jade.wrapper.StaleProxyException;
  * @author Tiziana Trucco - CSELT S.p.A.
  * @version  $Date: 2010-04-08 13:08:55 +0200 (gio, 08 apr 2010) $ $Revision: 6297 $
  */
-public class LayoutBuilderAgent extends Agent{
+public class OLD_LayoutBuilderAgent extends Agent{
 
     private Logger myLogger = Logger.getMyLogger(getClass().getName());
 
