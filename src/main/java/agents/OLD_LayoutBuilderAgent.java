@@ -103,6 +103,7 @@ public class OLD_LayoutBuilderAgent extends Agent{
 
     protected void setup() {
         // Registration with the DF
+        // com
         DFAgentDescription dfd = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
         sd.setType("PingAgent");
