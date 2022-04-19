@@ -1,1 +1,1 @@
-http://130.230.176.180:7778/acc
+http://dyn-176-216.public.tut.fi:7778/acc

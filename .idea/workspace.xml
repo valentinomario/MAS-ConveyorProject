@@ -5,74 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a70c8284-a2d0-44d6-aaeb-709b7031aebc" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_googlecode_json_simple_json_simple_1_1_1.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_tilab_jade_jade_4_3_3.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_tilab_jade_jade_test_suite_1_12_0.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__junit_junit_4_10.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_hamcrest_hamcrest_core_1_1.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_slf4j_slf4j_api_1_7_10.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_slf4j_slf4j_simple_1_7_10.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/APDescription.txt" beforeDir="false" afterPath="$PROJECT_DIR$/APDescription.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MTPs-Main-Container.txt" beforeDir="false" afterPath="$PROJECT_DIR$/MTPs-Main-Container.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demojade.iml" beforeDir="false" afterPath="$PROJECT_DIR$/demojade.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jade-4.3.3.jar" beforeDir="false" afterPath="$PROJECT_DIR$/jade-4.3.3.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jade-test-suite-1.12.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/jade-test-suite-1.12.0.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/agents/BookBuyerAgent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/agents/BookBuyerAgent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/agents/BookSellerAgent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/agents/BookSellerAgent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/agents/BookSellerGui.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/agents/BookSellerGui.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/agents/ConveyorAgent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/agents/ConveyorAgent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/JadeMaven-master.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/agents/OLD_LayoutBuilderAgent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/agents/OLD_LayoutBuilderAgent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/agents/Parse2Agent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/agents/Parse2Agent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/agents/PingAgent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/agents/PingAgent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/agents/PingArgumentsAgent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/agents/PingArgumentsAgent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/agents/PingDelayAgent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/agents/PingDelayAgent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/agents/PingMultipleReceiversAgent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/agents/PingMultipleReceiversAgent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/agents/RequesterAgent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/agents/RequesterAgent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/jade-main-container.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/jade-main-container.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/BookBuyerAgent$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/BookBuyerAgent$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/BookBuyerAgent$RequestPerformer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/BookBuyerAgent$RequestPerformer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/BookBuyerAgent.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/BookBuyerAgent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/BookSellerAgent$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/BookSellerAgent$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/BookSellerAgent$OfferRequestsServer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/BookSellerAgent$OfferRequestsServer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/BookSellerAgent$PurchaseOrdersServer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/BookSellerAgent$PurchaseOrdersServer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/BookSellerAgent.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/BookSellerAgent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/BookSellerGui$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/BookSellerGui$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/BookSellerGui$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/BookSellerGui$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/BookSellerGui.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/BookSellerGui.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/LayoutBuilderAgent$WaitPingAndReplyBehaviour.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/LayoutBuilderAgent$WaitPingAndReplyBehaviour.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/LayoutBuilderAgent.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/LayoutBuilderAgent.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/agents/ConveyorAgent$WaitPingAndReplyBehaviour.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/ConveyorAgent$WaitPingAndReplyBehaviour.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/agents/ConveyorAgent.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/ConveyorAgent.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/agents/OLD_LayoutBuilderAgent$WaitPingAndReplyBehaviour.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/OLD_LayoutBuilderAgent$WaitPingAndReplyBehaviour.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/agents/OLD_LayoutBuilderAgent.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/OLD_LayoutBuilderAgent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/Parse2Agent$WaitPingAndReplyBehaviour.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/Parse2Agent$WaitPingAndReplyBehaviour.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/Parse2Agent.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/Parse2Agent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/PingAgent$WaitPingAndReplyBehaviour.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/PingAgent$WaitPingAndReplyBehaviour.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/PingAgent.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/PingAgent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/PingArgumentsAgent$WaitPingAndReplyBehaviour.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/PingArgumentsAgent$WaitPingAndReplyBehaviour.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/PingArgumentsAgent.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/PingArgumentsAgent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/PingDelayAgent$WaitPingAndReplyBehaviour$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/PingDelayAgent$WaitPingAndReplyBehaviour$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/PingDelayAgent$WaitPingAndReplyBehaviour.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/PingDelayAgent$WaitPingAndReplyBehaviour.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/PingDelayAgent.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/PingDelayAgent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/PingMultipleReceiversAgent$WaitPingAndReplyBehaviour.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/PingMultipleReceiversAgent$WaitPingAndReplyBehaviour.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/PingMultipleReceiversAgent.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/PingMultipleReceiversAgent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/RequesterAgent$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/RequesterAgent$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/RequesterAgent$RequestPerformer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/RequesterAgent$RequestPerformer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/agents/RequesterAgent.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/agents/RequesterAgent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/jade-main-container.properties" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/jade-main-container.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/demojade-1.0-SNAPSHOT-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/demojade-1.0-SNAPSHOT-jar-with-dependencies.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/demojade-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/demojade-1.0-SNAPSHOT.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-archiver/pom.properties" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-archiver/pom.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,12 +41,14 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RunManager">
     <configuration name="demojade-1.0-SNAPSHOT-jar-with-dependencies.jar" type="JarApplication" temporary="true">
       <option name="JAR_PATH" value="$PROJECT_DIR$/target/demojade-1.0-SNAPSHOT-jar-with-dependencies.jar" />
-      <option name="PROGRAM_PARAMETERS" value="-gui -agents Mario:agents.PingAgent" />
+      <option name="PROGRAM_PARAMETERS" value="-gui -agents Mario:agents.OLD_LayoutBuilderAgent" />
       <option name="ALTERNATIVE_JRE_PATH" />
       <method v="2" />
     </configuration>
@@ -124,10 +67,22 @@
       <option name="presentableId" value="Default" />
       <updated>1650375537057</updated>
       <workItem from="1650375540042" duration="204000" />
+      <workItem from="1650376011469" duration="59000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
