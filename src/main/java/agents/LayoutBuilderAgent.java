@@ -62,46 +62,46 @@ public class LayoutBuilderAgent extends Agent{
             //Agent creation
             ContainerController containerController = getContainerController();
 
-            AgentController CNV1 = containerController.createNewAgent("CNV1","agents.ConveyorAgent", new Object[]{"CNV2"});
+            AgentController CNV1 = containerController.createNewAgent("CNV1","agents.ConveyorAgent", new Object[][]{ {"CNV2"}, {5}});
             CNV1.start();
 
-            AgentController CNV2 = containerController.createNewAgent("CNV2","agents.ConveyorAgent", new Object[]{"CNV3"});
+            AgentController CNV2 = containerController.createNewAgent("CNV2","agents.ConveyorAgent", new Object[][]{{"CNV3"}, {10}});
             CNV2.start();
 
-            AgentController CNV3 = containerController.createNewAgent("CNV3","agents.ConveyorAgent", new Object[]{"CNV4", "CNV13"});
+            AgentController CNV3 = containerController.createNewAgent("CNV3","agents.ConveyorAgent", new Object[][]{{"CNV4", "CNV13"}, {5}});
             CNV3.start();
 
-            AgentController CNV4 = containerController.createNewAgent("CNV4","agents.ConveyorAgent", new Object[]{"CNV5"});
+            AgentController CNV4 = containerController.createNewAgent("CNV4","agents.ConveyorAgent", new Object[][]{{"CNV5"}, {8}});
             CNV4.start();
 
-            AgentController CNV5 = containerController.createNewAgent("CNV5","agents.ConveyorAgent", new Object[]{"CNV6"});
+            AgentController CNV5 = containerController.createNewAgent("CNV5","agents.ConveyorAgent", new Object[][]{{"CNV6"}, {10}});
             CNV5.start();
 
-            AgentController CNV6 = containerController.createNewAgent("CNV6","agents.ConveyorAgent", new Object[]{"CNV7"});
+            AgentController CNV6 = containerController.createNewAgent("CNV6","agents.ConveyorAgent", new Object[][]{{"CNV7"}, {3}});
             CNV6.start();
 
-            AgentController CNV7 = containerController.createNewAgent("CNV7","agents.ConveyorAgent", new Object[]{"CNV8"});
+            AgentController CNV7 = containerController.createNewAgent("CNV7","agents.ConveyorAgent", new Object[][]{{"CNV8"}, {10}});
             CNV7.start();
 
-            AgentController CNV8 = containerController.createNewAgent("CNV8","agents.ConveyorAgent", new Object[]{"CNV9", "CNV14"});
+            AgentController CNV8 = containerController.createNewAgent("CNV8","agents.ConveyorAgent", new Object[][]{{"CNV9", "CNV14"}, {12}});
             CNV8.start();
 
-            AgentController CNV9 = containerController.createNewAgent("CNV9","agents.ConveyorAgent", new Object[]{"CNV10"});
+            AgentController CNV9 = containerController.createNewAgent("CNV9","agents.ConveyorAgent", new Object[][]{{"CNV10"}, {5}});
             CNV9.start();
 
-            AgentController CNV10 = containerController.createNewAgent("CNV10","agents.ConveyorAgent", new Object[]{"CNV11"});
+            AgentController CNV10 = containerController.createNewAgent("CNV10","agents.ConveyorAgent", new Object[][]{{"CNV11"}, {7}});
             CNV10.start();
 
-            AgentController CNV11 = containerController.createNewAgent("CNV11","agents.ConveyorAgent", new Object[]{"CNV12"});
+            AgentController CNV11 = containerController.createNewAgent("CNV11","agents.ConveyorAgent", new Object[][]{{"CNV12"}, {5}});
             CNV11.start();
 
-            AgentController CNV12 = containerController.createNewAgent("CNV12","agents.ConveyorAgent", new Object[]{"CNV1"});
+            AgentController CNV12 = containerController.createNewAgent("CNV12","agents.ConveyorAgent", new Object[][]{{"CNV1"}, {6}});
             CNV12.start();
 
-            AgentController CNV13 = containerController.createNewAgent("CNV13","agents.ConveyorAgent", new Object[]{"CNV9", "CNV14"});
+            AgentController CNV13 = containerController.createNewAgent("CNV13","agents.ConveyorAgent", new Object[][]{{"CNV9", "CNV14"},{10}});
             CNV13.start();
 
-            AgentController CNV14 = containerController.createNewAgent("CNV14","agents.ConveyorAgent", new Object[]{"CNV12"});
+            AgentController CNV14 = containerController.createNewAgent("CNV14","agents.ConveyorAgent", new Object[][]{{"CNV12"},{8}});
             CNV14.start();
 
         } catch (FIPAException e) {
