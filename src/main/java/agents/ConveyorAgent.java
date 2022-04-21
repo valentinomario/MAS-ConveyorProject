@@ -349,13 +349,17 @@ public class ConveyorAgent extends Agent{
                 // start timer
                 long timeoutMs = 1000L;
                 timeoutElapsed = false;
-                addBehaviour(new WakerBehaviour(myAgent, timeoutMs) {
-                    @Override
-                    protected void handleElapsedTimeout() {
-                        timeoutElapsed = true;
-                        myLogger.log(Logger.INFO, myAgent.getLocalName() + " - Timeout elapsed, it's time to take a look at the answers!");
-                    }
-                });
+
+//                WakerBehaviour wakerBehaviour = new WakerBehaviour(myAgent, timeoutMs) {
+//                    @Override
+//                    protected void handleElapsedTimeout() {
+//                        timeoutElapsed = true;
+//                        myLogger.log(Logger.INFO, myAgent.getLocalName() + " - Timeout elapsed, it's time to take a look at the answers!");
+//                    }
+//                };
+//                addBehaviour(wakerBehaviour);
+//                wakerBehaviour.action();
+
                 // propagate message to neighbours
                 // add myself to viaPoints array
                 ((JSONArray) msg.get("viaPoints")).add(myAgent.getLocalName());
@@ -374,9 +378,14 @@ public class ConveyorAgent extends Agent{
 
                 conveyor_status = Status.Busy;
 
+                // CAFONATA
+                long wakeUpTime = System.currentTimeMillis() + timeoutMs;
+
+
                 myLogger.log(Logger.INFO,myAgent.getLocalName() + " - Polling paths...");
                 // receiving answers about paths
-                while (!timeoutElapsed) {
+//                while (!timeoutElapsed) {
+                while (System.currentTimeMillis() < wakeUpTime) {
                     // todo template for receive()
                     ACLMessage rec = myAgent.receive();
                     if (rec != null && rec.getPerformative() == ACLMessage.INFORM) {
