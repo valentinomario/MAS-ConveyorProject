@@ -44,6 +44,7 @@ import org.json.simple.parser.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 /**
@@ -62,6 +63,7 @@ public class ConveyorAgent extends Agent{
     }
 
     private Status conveyor_status;
+    public Status getConveyor_status() {return conveyor_status;}
     private List<String> neighbours = new ArrayList<>();
     private int transfer_time;
     private boolean pallet_loaded;
@@ -79,9 +81,10 @@ public class ConveyorAgent extends Agent{
             if (msg != null){
                 ACLMessage reply = msg.createReply();
 
-                if (msg.getPerformative() == ACLMessage.NOT_UNDERSTOOD || msg.getPerformative() == ACLMessage.AGREE ||
-                        (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().contains("Transfer finished"))
-                    || msg.getPerformative() == ACLMessage.FAILURE) {
+                if (msg.getPerformative() == ACLMessage.NOT_UNDERSTOOD ||
+                         msg.getPerformative() == ACLMessage.AGREE ||
+                        (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().contains("Transfer finished")) ||
+                         msg.getPerformative() == ACLMessage.FAILURE) {
                     // do nothing
                 } else {
 
@@ -141,7 +144,7 @@ public class ConveyorAgent extends Agent{
                                 }
                                 else if (parsedRequest.get("status").equals("Down")) {
                                     reply.setPerformative(ACLMessage.AGREE);
-                                    reply.setContent("Setting status to Down");
+                                    reply.setContent("Setting status to Down\rBravo six, going dark");
                                     send(reply);
                                     conveyor_status = Status.Down;
                                 }
@@ -168,7 +171,7 @@ public class ConveyorAgent extends Agent{
                                 }
                             }
                             //The request must contain the ordered array of the via points and the transfer times
-                            else if ((content != null) && ((parsedRequest.get("request_type"))).equals("transfer")) {
+                            else if ((content != null) && ((parsedRequest.get("request_type"))).equals("routed_transfer")) {
                                 if (pallet_loaded) {
                                     JSONArray route = (JSONArray) parsedRequest.get("viaPoints");
                                     myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Received route: " + route);
@@ -182,7 +185,7 @@ public class ConveyorAgent extends Agent{
                                                 ACLMessage transferFinishedMessage = new ACLMessage(ACLMessage.INFORM);
                                                 transferFinishedMessage.addReceiver(new AID((String) route.get(0), AID.ISLOCALNAME));
                                                 transferFinishedMessage.setContent("Transfer Finished");
-//                                                send(transferFinishedMessage);
+                                                send(transferFinishedMessage);
                                                 //break;
                                             }
                                             else {
@@ -216,7 +219,7 @@ public class ConveyorAgent extends Agent{
 
                                                             MessageTemplate.MatchExpression agreeMessage = aclMessage ->
                                                                     (aclMessage.getPerformative() == ACLMessage.AGREE) || (aclMessage.getPerformative() == ACLMessage.REFUSE);  // lambda expression D:
-                                                            ACLMessage replyToLoad = myAgent.blockingReceive(new MessageTemplate(agreeMessage), replyTimeoutMs);   // TODO cosa succede se riceve un messaggio che non ci interessa? Consideriamo l'uso di MessageTemplate
+                                                            ACLMessage replyToLoad = myAgent.blockingReceive(new MessageTemplate(agreeMessage), replyTimeoutMs);
                                                             if ((replyToLoad != null) && (replyToLoad.getPerformative() == ACLMessage.AGREE)) {
                                                                 conveyor_status = Status.Idle;
                                                                 pallet_loaded = false;
@@ -244,16 +247,31 @@ public class ConveyorAgent extends Agent{
                                     send(reply);
                                 }
                             }
+                            else if ((content != null) && ((parsedRequest.get("request_type"))).equals("transfer")) {
+                                if (pallet_loaded) {
+                                    // add viaPoints array to parsedRequest
+                                    JSONArray viaPoints = new JSONArray();
+                                    parsedRequest.put("viaPoints", viaPoints);
+                                    // call BestPath
+                                    addBehaviour(new BestPath(myAgent, parsedRequest, new AID(myAgent.getLocalName(), AID.ISLOCALNAME), true,true));
+                                    // start following best path
+                                } else {
+                                    reply.setPerformative(ACLMessage.FAILURE);
+                                    reply.setContent("Cannot proceed, pallet not loaded");
+                                    myLogger.log(Logger.WARNING, "Agent " + getLocalName() + " - Cannot proceed, pallet not loaded");
+                                    send(reply);
+                                }
+                            }
                             else {
                                 reply.setPerformative(ACLMessage.FAILURE);
                                 reply.setContent("Could not understand the request");
                                 send(reply);
                             }
                         } catch (ParseException e) {
-                            myLogger.log(Logger.INFO, "Agent " + getLocalName() + " Request not understood -  received from " + msg.getSender().getLocalName());
+                            myLogger.log(Logger.INFO, "Agent " + getLocalName() + " Request not understood - received from " + msg.getSender().getLocalName());
                             reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
                             reply.setContent("Request not understood");
-                            e.printStackTrace();
+                            //e.printStackTrace();
                             send(reply);
                         }
 
@@ -264,7 +282,7 @@ public class ConveyorAgent extends Agent{
                             JSONParser jsonParser = new JSONParser();
                             JSONObject jsonObject = (JSONObject) jsonParser.parse(content);
 
-                            addBehaviour(new BestPath(myAgent, jsonObject, (msg.getPerformative() == ACLMessage.CFP)));
+                            addBehaviour(new BestPath(myAgent, jsonObject, msg.getSender(),(msg.getPerformative() == ACLMessage.CFP)));
                             myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Received path finding request: " + jsonObject.toString());
                         } catch (ParseException e) {
                             e.printStackTrace();
@@ -322,12 +340,17 @@ public class ConveyorAgent extends Agent{
     }
 
 
+
+    // -------------------------------------------------------------------------------------------------- //
+
+
     // behaviour to ask look for the best path
     private class BestPath extends Behaviour {
         JSONObject msg; //
+        AID sender = null;
         private boolean isDone = false,
                              SOC = false;
-
+        private boolean transferAfterFindingRoute = false;
         public BestPath(Agent a, JSONObject s) {
             super(a);
             msg = s;
@@ -338,17 +361,34 @@ public class ConveyorAgent extends Agent{
             this.SOC = SOC;
         }
 
+        public BestPath(Agent a, JSONObject s, AID sender, boolean SOC) {
+            this(a,s,SOC);
+            this.sender = sender;
+        }
+
+        public BestPath(Agent a, JSONObject s, AID sender, boolean SOC, boolean transferAfterFindingRoute) {
+            this(a,s,sender,SOC);
+            this.transferAfterFindingRoute = transferAfterFindingRoute;
+        }
+
         boolean timeoutElapsed = false;
 
         public void action() {
-            //Start of Communication, I am the source
+            //Check the format of the message
+            if((msg.get("source") == null) || (msg.get("destination") == null) || (msg.get("viaPoints") == null)) {
+                myLogger.log(Logger.WARNING,myAgent.getLocalName()+" - Wrong format");
+                isDone = true;
+                return;
+            }
 
-            // I am source //basta SOC per sapere che sono la source
+
+            // I am source
             if (SOC) {
-                // if the viaPoints array is empty, we are done
-                // start timer
-                long timeoutMs = 1000L;
-                timeoutElapsed = false;
+                if (msg.get("source").equals(myAgent.getLocalName())) {
+                    // if the viaPoints array is empty, we are done
+                    // start timer
+                    long timeoutMs = 1000L;
+                    timeoutElapsed = false;
 
 //                WakerBehaviour wakerBehaviour = new WakerBehaviour(myAgent, timeoutMs) {
 //                    @Override
@@ -360,107 +400,141 @@ public class ConveyorAgent extends Agent{
 //                addBehaviour(wakerBehaviour);
 //                wakerBehaviour.action();
 
-                // propagate message to neighbours
-                // add myself to viaPoints array
-                ((JSONArray) msg.get("viaPoints")).add(myAgent.getLocalName());
-                ACLMessage propagateMsg = new ACLMessage(ACLMessage.PROPAGATE);
-                // add receivers to message
-                for (String n : neighbours) {
-                    propagateMsg.addReceiver(new AID(n, AID.ISLOCALNAME));
-                }
-                // set the content
-                propagateMsg.setContent(msg.toString());
-                // send the message
-                myAgent.send(propagateMsg);
+                    // propagate message to neighbours
+                    // add myself to viaPoints array
+                    ((JSONArray) msg.get("viaPoints")).add(myAgent.getLocalName());
+                    ACLMessage propagateMsg = new ACLMessage(ACLMessage.PROPAGATE);
+                    // add receivers to message
+                    for (String n : neighbours) {
+                        propagateMsg.addReceiver(new AID(n, AID.ISLOCALNAME));
+                    }
+                    // set the content
+                    propagateMsg.setContent(msg.toString());
+                    // send the message
+                    myAgent.send(propagateMsg);
 
-                // wait for the messages and put them in a list
-                List<JSONObject> messages = new ArrayList<>();
+                    // wait for the messages and put them in a list
+                    List<JSONObject> messages = new ArrayList<>();
 
-                conveyor_status = Status.Busy;
+                    conveyor_status = Status.Busy;
 
-                // CAFONATA
-                long wakeUpTime = System.currentTimeMillis() + timeoutMs;
+                    // CAFONATA
+                    long wakeUpTime = System.currentTimeMillis() + timeoutMs;
 
 
-                myLogger.log(Logger.INFO,myAgent.getLocalName() + " - Polling paths...");
-                // receiving answers about paths
+                    myLogger.log(Logger.INFO, myAgent.getLocalName() + " - Polling paths...");
+                    // receiving answers about paths
 //                while (!timeoutElapsed) {
-                while (System.currentTimeMillis() < wakeUpTime) {
-                    // todo template for receive()
-                    ACLMessage rec = myAgent.receive();
-                    if (rec != null && rec.getPerformative() == ACLMessage.INFORM) {
-                        try {
-                            JSONParser jsonParser = new JSONParser();
-                            messages.add((JSONObject) jsonParser.parse(rec.getContent()));
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    while (System.currentTimeMillis() < wakeUpTime) {
+                        MessageTemplate.MatchExpression recvMessage = aclMessage -> (aclMessage.getPerformative() == ACLMessage.INFORM);  // lambda expression D:
 
-                }
-                // if no replies
-                if (messages.isEmpty()) {
-                    ACLMessage noPathMsg = new ACLMessage(ACLMessage.FAILURE);
-                    // TODO capire a chi mandare il messaggio di errore
-                    noPathMsg.setContent("Failed to find a path for the request\n" + msg);
-                    myAgent.send(noPathMsg);
-                    myLogger.log(Logger.WARNING, myAgent.getLocalName() + " - Received no replies while looking for path from " + msg.get("source") + " to " + msg.get("destination"));
-                } else {
-                    // compare all the possible path
-                    JSONObject bestPath = (JSONObject) messages.get(0);
-                    int minLength = ((JSONArray) messages.get(0).get("viaPoints")).size();
-                    for (JSONObject path : messages) {
-                        int pathLength = ((JSONArray) path.get("viaPoints")).size();
-                        if (pathLength < minLength) {
-                            bestPath = path;
-                            minLength = pathLength;
+                        ACLMessage rec = myAgent.receive(new MessageTemplate(recvMessage));
+                        if (rec != null && rec.getPerformative() == ACLMessage.INFORM) {
+                            try {
+                                JSONParser jsonParser = new JSONParser();
+                                messages.add((JSONObject) jsonParser.parse(rec.getContent()));
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
                         }
+
                     }
-                    // best path found
-                    myLogger.log(Logger.INFO, myAgent.getLocalName() + " - found best path (with lenght " + minLength + "): " + bestPath.toString());
+                    // if no replies
+                    if (messages.isEmpty()) {
+                        if(sender != null) {
+                            ACLMessage noPathMsg = new ACLMessage(ACLMessage.FAILURE);
+                            noPathMsg.setContent("Failed to find a path for the request\n" + msg);
+                            noPathMsg.addReceiver(sender);
+                            myAgent.send(noPathMsg);
+                        }
+                        myLogger.log(Logger.WARNING, myAgent.getLocalName() + " - Received no replies while looking for path from " + msg.get("source") + " to " + msg.get("destination"));
+                    } else {
+                        // compare all the possible path
+                        JSONObject bestPath = (JSONObject) messages.get(0);
+                        int minLength = ((JSONArray) messages.get(0).get("viaPoints")).size();
+                        for (JSONObject path : messages) {
+                            int pathLength = ((JSONArray) path.get("viaPoints")).size();
+                            if (pathLength < minLength) {
+                                bestPath = path;
+                                minLength = pathLength;
+                            }
+                        }
+                        // best path found
+                        if(sender != null) {
+                            ACLMessage pathFound = new ACLMessage();
+                            pathFound.addReceiver(sender);
+                            if(transferAfterFindingRoute) {
+                                pathFound.setPerformative(ACLMessage.REQUEST);
+                                bestPath.replace("request_type", "routed_transfer");
+                            }else {
+                                pathFound.setPerformative(ACLMessage.INFORM);
+                            }
+                            pathFound.setContent(bestPath.toString());
+                            send(pathFound);
+                        }
+                        myLogger.log(Logger.INFO, myAgent.getLocalName() + " - found best path (with lenght " + minLength + "): " + bestPath.toString());
+                    }
+                    conveyor_status = Status.Idle;
+                    isDone = true;
                 }
-                conveyor_status = Status.Idle;
-                isDone = true; // ?
+                // SOC was sent to a CNV that is not the source
+                else {
+                    ACLMessage forward = new ACLMessage(ACLMessage.CFP);
+                    forward.setContent(msg.toString());
+                    forward.addReceiver(new AID(msg.get("source").toString(), AID.ISLOCALNAME));
+                    send(forward);
+                    myLogger.log(Logger.WARNING, myAgent.getLocalName() + " - The PathFinding request was sent to the wrong agent - Rerouting request ...");
+                    isDone = true;
+                }
             }
             // I am destination
-            else if (((String)myAgent.getLocalName()).equals(msg.get("destination"))) {
-                // destination cnv is added to viaPoints
-                ((JSONArray) msg.get("viaPoints")).add(myAgent.getLocalName());
-                // send full list to source
-                // create message
-                ACLMessage fullList = new ACLMessage(ACLMessage.INFORM);
-                // find target
-                AID targetAID = new AID((String) msg.get("source"), AID.ISLOCALNAME);
-                // add receiver to message
-                fullList.addReceiver(targetAID);
-                // set the content
-                fullList.setContent(msg.toString());
-                // send the message
-                myAgent.send(fullList);
-                // log
-                myLogger.log(Logger.INFO, myAgent.getLocalName() + " - I am the destination. Sending the full list to source.");
-                // done
-                isDone = true;
-            }
-            else {
-                // add myself to viaPoints array
-                ((JSONArray) msg.get("viaPoints")).add(myAgent.getLocalName());
-                // propagate the message
-                ACLMessage propagateMsg = new ACLMessage(ACLMessage.PROPAGATE);
-                // add receivers to message
-                for (String n : neighbours) {
-                    propagateMsg.addReceiver(new AID(n, AID.ISLOCALNAME));
+            else if ((myAgent.getLocalName()).equals(msg.get("destination"))) {
+                //Propagate only if the conveyor is idle, if not the path is not valid
+                if (((ConveyorAgent) myAgent).getConveyor_status() == Status.Idle) {
+                    // destination cnv is added to viaPoints
+                    ((JSONArray) msg.get("viaPoints")).add(myAgent.getLocalName());
+                    // send full list to source
+                    // create message
+                    ACLMessage fullList = new ACLMessage(ACLMessage.INFORM);
+                    // find target
+                    AID targetAID = new AID((String) msg.get("source"), AID.ISLOCALNAME);
+                    // add receiver to message
+                    fullList.addReceiver(targetAID);
+                    // set the content
+                    fullList.setContent(msg.toString());
+                    // send the message
+                    myAgent.send(fullList);
+                    // log
+                    myLogger.log(Logger.INFO, myAgent.getLocalName() + " - I am the destination. Sending the full list to source.");
+                    // done
+                    isDone = true;
                 }
-                // set the content
-                propagateMsg.setContent(msg.toString());
-                // send the message
-                myAgent.send(propagateMsg);
-                // log
-                myLogger.log(Logger.INFO, myAgent.getLocalName() + " - Adding myself to the list and propagating the message.");
-                // done
-                isDone = true;
+            }
+            // I am part of the path
+            else {
+                //Propagate only if the conveyor is idle, if not the path is not valid
+                if (((ConveyorAgent) myAgent).getConveyor_status() == Status.Idle) {
+                    // add myself to viaPoints array
+                    ((JSONArray) msg.get("viaPoints")).add(myAgent.getLocalName());
+                    // propagate the message
+                    ACLMessage propagateMsg = new ACLMessage(ACLMessage.PROPAGATE);
+                    // add receivers to message
+                    for (String n : neighbours) {
+                        propagateMsg.addReceiver(new AID(n, AID.ISLOCALNAME));
+                    }
+                    // set the content
+                    propagateMsg.setContent(msg.toString());
+                    // send the message
+                    myAgent.send(propagateMsg);
+                    // log
+                    myLogger.log(Logger.INFO, myAgent.getLocalName() + " - Adding myself to the list and propagating the message.");
+                    // done
+                    isDone = true;
+                }
             }
         }
+
+
 
 
         public boolean done() {

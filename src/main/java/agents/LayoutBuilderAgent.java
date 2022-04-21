@@ -24,6 +24,7 @@
 
 package agents;
 
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
@@ -106,6 +107,14 @@ public class LayoutBuilderAgent extends Agent{
 
             AgentController Sniffer = containerController.createNewAgent("Sniffer", "jade.tools.sniffer.Sniffer", new Object[]{"CNV1;CNV2;CNV3;CNV4;CNV5;CNV6;CNV7;CNV8;CNV9;CNV10;CNV11;CNV12;CNV13;CNV14"});
             Sniffer.start();
+
+
+            // load CNV2 by default
+            ACLMessage loadMsg = new ACLMessage(ACLMessage.REQUEST);
+            loadMsg.addReceiver(new AID("CNV2", AID.ISLOCALNAME));
+            loadMsg.setContent("{\"request_type\":\"load\"}");
+            send(loadMsg);
+
 
         } catch (FIPAException e) {
             myLogger.log(Logger.SEVERE, "Agent "+getLocalName()+" - Cannot register with DF", e);
