@@ -65,7 +65,7 @@ public class LayoutBuilderAgent extends Agent{
             AgentController CNV1 = containerController.createNewAgent("CNV1","agents.ConveyorAgent", new Object[][]{ {"CNV2"}, {5}});
             CNV1.start();
 
-            AgentController CNV2 = containerController.createNewAgent("CNV2","agents.ConveyorAgent", new Object[][]{{"CNV3"}, {10}});
+            AgentController CNV2 = containerController.createNewAgent("CNV2","agents.ConveyorAgent", new Object[][]{{"CNV3"}, {5}});
             CNV2.start();
 
             AgentController CNV3 = containerController.createNewAgent("CNV3","agents.ConveyorAgent", new Object[][]{{"CNV4", "CNV13"}, {5}});
@@ -74,16 +74,16 @@ public class LayoutBuilderAgent extends Agent{
             AgentController CNV4 = containerController.createNewAgent("CNV4","agents.ConveyorAgent", new Object[][]{{"CNV5"}, {8}});
             CNV4.start();
 
-            AgentController CNV5 = containerController.createNewAgent("CNV5","agents.ConveyorAgent", new Object[][]{{"CNV6"}, {10}});
+            AgentController CNV5 = containerController.createNewAgent("CNV5","agents.ConveyorAgent", new Object[][]{{"CNV6"}, {5}});
             CNV5.start();
 
             AgentController CNV6 = containerController.createNewAgent("CNV6","agents.ConveyorAgent", new Object[][]{{"CNV7"}, {3}});
             CNV6.start();
 
-            AgentController CNV7 = containerController.createNewAgent("CNV7","agents.ConveyorAgent", new Object[][]{{"CNV8"}, {10}});
+            AgentController CNV7 = containerController.createNewAgent("CNV7","agents.ConveyorAgent", new Object[][]{{"CNV8"}, {5}});
             CNV7.start();
 
-            AgentController CNV8 = containerController.createNewAgent("CNV8","agents.ConveyorAgent", new Object[][]{{"CNV9", "CNV14"}, {12}});
+            AgentController CNV8 = containerController.createNewAgent("CNV8","agents.ConveyorAgent", new Object[][]{{"CNV9", "CNV14"}, {5}});
             CNV8.start();
 
             AgentController CNV9 = containerController.createNewAgent("CNV9","agents.ConveyorAgent", new Object[][]{{"CNV10"}, {5}});
@@ -98,11 +98,14 @@ public class LayoutBuilderAgent extends Agent{
             AgentController CNV12 = containerController.createNewAgent("CNV12","agents.ConveyorAgent", new Object[][]{{"CNV1"}, {6}});
             CNV12.start();
 
-            AgentController CNV13 = containerController.createNewAgent("CNV13","agents.ConveyorAgent", new Object[][]{{"CNV9", "CNV14"},{10}});
+            AgentController CNV13 = containerController.createNewAgent("CNV13","agents.ConveyorAgent", new Object[][]{{"CNV9", "CNV14"},{5}});
             CNV13.start();
 
             AgentController CNV14 = containerController.createNewAgent("CNV14","agents.ConveyorAgent", new Object[][]{{"CNV12"},{8}});
             CNV14.start();
+
+            AgentController Sniffer = containerController.createNewAgent("Sniffer", "jade.tools.sniffer.Sniffer", new Object[]{"CNV1;CNV2;CNV3;CNV4;CNV5;CNV6;CNV7;CNV8;CNV9;CNV10;CNV11;CNV12;CNV13;CNV14"});
+            Sniffer.start();
 
         } catch (FIPAException e) {
             myLogger.log(Logger.SEVERE, "Agent "+getLocalName()+" - Cannot register with DF", e);
