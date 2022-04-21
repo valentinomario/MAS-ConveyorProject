@@ -404,10 +404,10 @@ public class ConveyorAgent extends Agent{
                     // TODO capire a chi mandare il messaggio di errore
                     noPathMsg.setContent("Failed to find a path for the request\n" + msg);
                     myAgent.send(noPathMsg);
-                    // TODO log
+                    myLogger.log(Logger.WARNING, myAgent.getLocalName() + " - Received no replies while looking for path from " + msg.get("source") + " to " + msg.get("destination"));
                 } else {
                     // compare all the possible path
-                    JSONObject bestPath = new JSONObject();
+                    JSONObject bestPath = (JSONObject) messages.get(0);
                     int minLength = ((JSONArray) messages.get(0).get("viaPoints")).size();
                     for (JSONObject path : messages) {
                         int pathLength = ((JSONArray) path.get("viaPoints")).size();
@@ -417,16 +417,18 @@ public class ConveyorAgent extends Agent{
                         }
                     }
                     // best path found
-                    myLogger.log(Logger.INFO, myAgent.getLocalName() + " - found best path: " + bestPath.toString());
+                    myLogger.log(Logger.INFO, myAgent.getLocalName() + " - found best path (with lenght " + minLength + "): " + bestPath.toString());
                 }
                 conveyor_status = Status.Idle;
                 isDone = true; // ?
             }
             // I am destination
             else if (((String)myAgent.getLocalName()).equals(msg.get("destination"))) {
+                // destination cnv is added to viaPoints
+                ((JSONArray) msg.get("viaPoints")).add(myAgent.getLocalName());
                 // send full list to source
                 // create message
-                ACLMessage fullList = new ACLMessage(ACLMessage.INFORM);    //TODO: ascoltare inform
+                ACLMessage fullList = new ACLMessage(ACLMessage.INFORM);
                 // find target
                 AID targetAID = new AID((String) msg.get("source"), AID.ISLOCALNAME);
                 // add receiver to message
