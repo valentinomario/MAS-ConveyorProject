@@ -43,16 +43,13 @@ import org.json.simple.parser.ParseException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
+
 
 /**
  * This agent implements a model of a conveyor belt. It knows the following conveyor(s).
  * The agent is capable of driving a package through a network of conveyor belts.
  *
  * @author Luigi Catello, Mario Valentino
- * @version  $Date: 2010-04-08 13:08:55 +0200 (gio, 08 apr 2010) $ $Revision: 6297 $
  */
 
 public class ConveyorAgent extends Agent{
@@ -485,7 +482,6 @@ public class ConveyorAgent extends Agent{
 //                    }
 //                };
 //                addBehaviour(wakerBehaviour);
-//                wakerBehaviour.action();
                     long wakeUpTime = System.currentTimeMillis() + timeoutMs;
                     myLogger.log(Logger.INFO, myAgent.getLocalName() + " - Polling paths...");
 
@@ -497,6 +493,7 @@ public class ConveyorAgent extends Agent{
                         if (rec != null && rec.getPerformative() == ACLMessage.INFORM) {
                             try {
                                 JSONParser jsonParser = new JSONParser();
+                                // add the path found to the messages list
                                 messages.add((JSONObject) jsonParser.parse(rec.getContent()));
                             } catch (ParseException e) {
                                 e.printStackTrace();
@@ -559,7 +556,7 @@ public class ConveyorAgent extends Agent{
             }
             // I am destination
             else if (msg.get("destination").equals(myAgent.getLocalName())) {
-                //Propagate only if the conveyor is idle, if not the path is not valid
+                // Propagate only if the conveyor is idle, if not the path is not valid
                 if (((ConveyorAgent) myAgent).getConveyor_status() == Status.Idle) {
                     // destination cnv is added to viaPoints
                     ((JSONArray) msg.get("viaPoints")).add(myAgent.getLocalName());
@@ -571,7 +568,7 @@ public class ConveyorAgent extends Agent{
                     // send the message
                     fullList.addReceiver(targetAID);
                     fullList.setContent(msg.toString());
-                    myAgent.send(fullList);
+                    send(fullList);
 
                     myLogger.log(Logger.INFO, myAgent.getLocalName() + " - I am the destination. Sending the full list to source.");
                     isDone = true;
@@ -579,13 +576,14 @@ public class ConveyorAgent extends Agent{
             }
             // I am part of the path
             else {
-                //Propagate only if the conveyor is idle, if not the path is not valid
+                // Propagate only if the conveyor is idle, if not the path is not valid
                 if (((ConveyorAgent) myAgent).getConveyor_status() == Status.Idle) {
                     // let's check if the CNV is already in the viaPoints array
                     if (((JSONArray) msg.get("viaPoints")).contains(myAgent.getLocalName())) {
                         // already in the array -> pathfinder is stuck in a loop
                         isDone = true;
                         return;
+                        // do not send any message
                     }
                     // add myself to viaPoints array
                     ((JSONArray) msg.get("viaPoints")).add(myAgent.getLocalName());
@@ -602,9 +600,6 @@ public class ConveyorAgent extends Agent{
                 }
             }
         }
-
-
-
 
         public boolean done() {
             return isDone;
