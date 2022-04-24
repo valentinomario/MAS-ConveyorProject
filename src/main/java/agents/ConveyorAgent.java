@@ -62,11 +62,16 @@ public class ConveyorAgent extends Agent{
         Down
     }
 
+    // status of the conveyor
     private Status conveyor_status;
     public Status getConveyor_status() {return conveyor_status;}
+    // names of the conveyors following the agent
     private List<String> neighbours = new ArrayList<>();
+    // seconds it takes the conveyor to transfer the pallet
     private int transfer_time;
+    // whether the pallet is currently loaded
     private boolean pallet_loaded;
+
     private Logger myLogger = Logger.getMyLogger(getClass().getName());
 
     private class TransferControlBehaviour extends CyclicBehaviour {
@@ -86,15 +91,15 @@ public class ConveyorAgent extends Agent{
                         (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().contains("Transfer finished")) ||
                          msg.getPerformative() == ACLMessage.FAILURE) {
                     // do nothing
-                } else {
-
+                    // this check is done to prevent an infinite NOT_UNDERSTOOD loop conversation between two agents
+                }
+                else {
                     if (msg.getPerformative() == ACLMessage.REQUEST) {
                         String content = msg.getContent();
                         try {
                             JSONParser jsonParser = new JSONParser();
                             JSONObject parsedRequest = (JSONObject) jsonParser.parse(content);
-                            //myLogger.log(Logger.INFO,"Ciao" + parsedRequest.get("request_type"));
-                            //Replies with its neighbours
+                            // Replies with info on the agent
                             if ((content != null) && ((parsedRequest.get("request_type"))).equals("get_info")) {
                                 JSONObject replyObject = new JSONObject();
                                 replyObject.put("Neighbours", neighbours);
@@ -106,20 +111,22 @@ public class ConveyorAgent extends Agent{
                                 reply.setContent(replyObject.toString());
                                 send(reply);
                             }
-                            //Load the pallet on the conveyor
+                            // Load the pallet on the conveyor
                             else if ((content != null) && ((parsedRequest.get("request_type"))).equals("load")) {
                                 if (conveyor_status == Status.Busy || pallet_loaded) {
                                     reply.setPerformative(ACLMessage.FAILURE);
                                     reply.setContent("Conveyor busy, cannot load!");
                                     send(reply);
                                     myLogger.log(Logger.WARNING, "Agent " + getLocalName() + " - Busy, cannot load");
-                                } else if (conveyor_status == Status.Down) {
+                                }
+                                else if (conveyor_status == Status.Down) {
                                     reply.setPerformative(ACLMessage.FAILURE);
                                     reply.setContent("Conveyor down, cannot load!");
                                     send(reply);
                                     myLogger.log(Logger.WARNING, "Agent " + getLocalName() + " - Down, cannot load");
-                                } else {
-                                    //Load the pallet, update the status
+                                }
+                                else {
+                                    // Load the pallet, update the status
                                     conveyor_status = Status.Busy;
                                     pallet_loaded = true;
                                     reply.setPerformative(ACLMessage.AGREE);
@@ -128,7 +135,24 @@ public class ConveyorAgent extends Agent{
                                     myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Pallet loaded");
                                 }
                             }
-                            //Set the status of the conveyor
+                            // Unload the pallet from the conveyor
+                            else if ((content != null) && ((parsedRequest.get("request_type"))).equals("unload")) {
+                                if (pallet_loaded && conveyor_status != Status.Down) {
+                                    reply.setPerformative(ACLMessage.AGREE);
+                                    reply.setContent("Pallet unloaded");
+                                    send(reply);
+                                    conveyor_status = Status.Idle;
+                                    pallet_loaded = false;
+                                    myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Pallet unloaded");
+                                }
+                                else {
+                                    reply.setPerformative(ACLMessage.FAILURE);
+                                    reply.setContent("Pallet not unloaded");
+                                    send(reply);
+                                    myLogger.log(Logger.WARNING, "Agent " + getLocalName() + " - Pallet not unloaded");
+                                }
+                            }
+                            // Set the status of the conveyor
                             else if ((content != null) && ((parsedRequest.get("request_type"))).equals("set_status")) {
                                 if (parsedRequest.get("status").equals("Idle")) {
                                     reply.setPerformative(ACLMessage.AGREE);
@@ -144,7 +168,7 @@ public class ConveyorAgent extends Agent{
                                 }
                                 else if (parsedRequest.get("status").equals("Down")) {
                                     reply.setPerformative(ACLMessage.AGREE);
-                                    reply.setContent("Setting status to Down\rBravo six, going dark");
+                                    reply.setContent("Setting status to Down\nBravo six, going dark");
                                     send(reply);
                                     conveyor_status = Status.Down;
                                 }
@@ -154,56 +178,42 @@ public class ConveyorAgent extends Agent{
                                     send(reply);
                                 }
                             }
-                            //Unload the pallet from the conveyor
-                            else if ((content != null) && ((parsedRequest.get("request_type"))).equals("unload")) {
-                                if (pallet_loaded && conveyor_status != Status.Down) {
-                                    reply.setPerformative(ACLMessage.AGREE);
-                                    reply.setContent("Pallet unloaded");
-                                    send(reply);
-                                    conveyor_status = Status.Idle;
-                                    pallet_loaded = false;
-                                    myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Pallet unloaded");
-                                } else {
-                                    reply.setPerformative(ACLMessage.FAILURE);
-                                    reply.setContent("Pallet not unloaded");
-                                    send(reply);
-                                    myLogger.log(Logger.WARNING, "Agent " + getLocalName() + " - Pallet not unloaded");
-                                }
-                            }
-                            //The request must contain the ordered array of the via points and the transfer times
+                            // Transfer a pallet knowing the route in advance
+                            // The request must contain the ordered array of the via points
                             else if ((content != null) && ((parsedRequest.get("request_type"))).equals("routed_transfer")) {
+                                // the transfer can only occur if the pallet is loaded on the cnv
                                 if (pallet_loaded) {
                                     JSONArray route = (JSONArray) parsedRequest.get("viaPoints");
                                     myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Received route: " + route);
-                                    //Finds himself in the route and send the pallet to the next one
+                                    // Finds itself in the route and sends the pallet to the next one
                                     for (int i = 0; i < route.size(); i++) {
                                         if (((String) route.get(i)).equals(myAgent.getLocalName())) {
-                                            //If I am the last, I don't have to transfer
+                                            // If I am the last -> I don't have to transfer
                                             if (i == (route.size() - 1)) {
                                                 myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Transfer finished");
-                                                //Inform the first conveyor that the transfer has finished.
+                                                // Inform the first conveyor that the transfer has finished.
                                                 ACLMessage transferFinishedMessage = new ACLMessage(ACLMessage.INFORM);
                                                 transferFinishedMessage.addReceiver(new AID((String) route.get(0), AID.ISLOCALNAME));
                                                 transferFinishedMessage.setContent("Transfer finished");
                                                 send(transferFinishedMessage);
-                                                //break;
                                             }
                                             else {
                                                 myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Transfer continuing");
-                                                //Transfer to the next conveyor (wait)
+                                                // Transfer to the next conveyor (after waiting for transfer time)
                                                 // get next cnv
                                                 String nextCnv = (String) route.get(i + 1);
-                                                // transfer after transfer_time
+                                                // while waiting for the transfer_time to pass, the cnv is busy
                                                 conveyor_status = Status.Busy;
-                                                int finalI = i; //Java :)
+                                                int finalI = i; // Java :)
 
                                                 addBehaviour(new WakerBehaviour(myAgent, transfer_time*1000L) {
                                                     protected void handleElapsedTimeout() {
-                                                        //Simulation: pallet unloaded and loaded on the following conveyor
+                                                        // Simulation: pallet unloaded and loaded on the following conveyor
                                                         ACLMessage loadNextConveyor = new ACLMessage(ACLMessage.REQUEST);
                                                         JSONObject loadMessage = new JSONObject();
                                                         loadMessage.put("request_type", "load");
                                                         loadNextConveyor.setContent(loadMessage.toString());
+                                                        // check that next conveyor in the route is actually a neighbour
                                                         if (!neighbours.contains((String) route.get(finalI +1))){
                                                             myLogger.log(Logger.WARNING, "Agent " + getLocalName() + " - Next conveyor is not a neighbour");
                                                             reply.setPerformative(ACLMessage.FAILURE);
@@ -212,15 +222,19 @@ public class ConveyorAgent extends Agent{
                                                         }
                                                         else {
                                                             loadNextConveyor.addReceiver(new AID((String) route.get(finalI + 1), AID.ISLOCALNAME));
+                                                            send(loadNextConveyor);
                                                             myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Transferring the pallet to " + route.get(finalI + 1));
-                                                            myAgent.send(loadNextConveyor);
 
                                                             // if the next cnv loads the pallet, send the transfer instruction
                                                             long replyTimeoutMs = 1000L;
 
+                                                            // checking if the transfer was successful
+                                                            // message template for the reply
                                                             MessageTemplate.MatchExpression agreeMessage = aclMessage ->
                                                                     (aclMessage.getPerformative() == ACLMessage.AGREE) || (aclMessage.getPerformative() == ACLMessage.REFUSE);  // lambda expression D:
+                                                            // wait for an AGREE or REFUSE for replyTimeoutMs
                                                             ACLMessage replyToLoad = myAgent.blockingReceive(new MessageTemplate(agreeMessage), replyTimeoutMs);
+                                                            // if the load was successful
                                                             if ((replyToLoad != null) && (replyToLoad.getPerformative() == ACLMessage.AGREE)) {
                                                                 conveyor_status = Status.Idle;
                                                                 pallet_loaded = false;
@@ -453,8 +467,6 @@ public class ConveyorAgent extends Agent{
                     List<JSONObject> messages = new ArrayList<>();
 
                     conveyor_status = Status.Busy;
-
-                    // CAFONATA
                     long wakeUpTime = System.currentTimeMillis() + timeoutMs;
 
 
