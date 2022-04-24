@@ -1,25 +1,3 @@
-# Table of Contents
-
-[Table of Contents [2](#table-of-contents)](#table-of-contents)
-
-[Introduction [3](#introduction)](#introduction)
-
-[Theoretical background
-[4](#theoretical-background)](#theoretical-background)
-
-[Weakness and strengths of our solution
-[5](#weakness-and-strengths-of-our-solution)](#weakness-and-strengths-of-our-solution)
-
-[Future work [6](#future-work)](#future-work)
-
-[Inter-agents interactions
-[7](#inter-agents-interactions)](#inter-agents-interactions)
-
-[Conveyor agent logic [8](#conveyor-agent-logic)](#conveyor-agent-logic)
-
-[Instructions to run and test our solution
-[10](#instructions-to-run-and-test-our-solution)](#instructions-to-run-and-test-our-solution)
-
 # Introduction
 
 In this project, we are using the power of Multi Agent Systems to solve
@@ -77,8 +55,7 @@ follow another route if it is faster.
 
 # Inter-agents interactions
 
-![](./media/image1.png){width="6.49583552055993in"
-height="4.565277777777778in"}
+![](./media/image1.png)
 
 On line 1, the request for transfer from CNV2 to CNV12 is sent to
 CNV2[^1].\
@@ -108,13 +85,11 @@ the source conveyor (CNV2), saying that the transfer is completed.
 The logic of the ConveyorAgent can be represented using two flowcharts:
 one for the TransferControl Behaviour and one for the BestPath behavior.
 
-![C:\\Users\\nnluca\\Downloads\\masFlow.drawio.png](./media/image2.png){width="6.443620953630796in"
-height="7.84799978127734in"}
+![C:\\Users\\nnluca\\Downloads\\masFlow.drawio.png](./media/image2.png)
 
 Figure 1: TransferControlBehaviour flowchart
 
-![](./media/image3.png){width="5.029343832020998in"
-height="6.079656605424322in"}
+![](./media/image3.png)
 
 Figure 2: BestPath flowchart
 
