@@ -238,7 +238,7 @@ public class ConveyorAgent extends Agent{
                                                             if ((replyToLoad != null) && (replyToLoad.getPerformative() == ACLMessage.AGREE)) {
                                                                 conveyor_status = Status.Idle;
                                                                 pallet_loaded = false;
-                                                                //After sending the pallet, send the route to the next conveyor
+                                                                // After sending the pallet, send the route to the next conveyor
                                                                 ACLMessage truthSpreader = new ACLMessage(ACLMessage.REQUEST);
                                                                 truthSpreader.addReceiver(new AID((String) route.get(finalI + 1), AID.ISLOCALNAME));
                                                                 truthSpreader.setContent(msg.getContent());
@@ -249,7 +249,9 @@ public class ConveyorAgent extends Agent{
                                                                 // load refused, try again three times
                                                                 boolean pallet_sent = false;
                                                                 for(int i=0; i<2;i++){
+                                                                    // wait 5s
                                                                     doWait(5000L);
+                                                                    // the code is the same as above
                                                                     send(loadNextConveyor);
                                                                     MessageTemplate.MatchExpression agreeMessage2 = aclMessage ->
                                                                             (aclMessage.getPerformative() == ACLMessage.AGREE) || (aclMessage.getPerformative() == ACLMessage.REFUSE);  // lambda expression D:
@@ -257,19 +259,21 @@ public class ConveyorAgent extends Agent{
                                                                    if ((replyToLoad2 != null) && (replyToLoad2.getPerformative() == ACLMessage.AGREE)) {
                                                                        conveyor_status = Status.Idle;
                                                                        pallet_loaded = false;
-                                                                       //After sending the pallet, send the route to the next conveyor
                                                                        ACLMessage truthSpreader = new ACLMessage(ACLMessage.REQUEST);
                                                                        truthSpreader.addReceiver(new AID((String) route.get(finalI + 1), AID.ISLOCALNAME));
                                                                        truthSpreader.setContent(msg.getContent());
                                                                        myAgent.send(truthSpreader);
                                                                        myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Spreading the truth...");
+                                                                       // if the transfer is successful the agent can stop trying
                                                                        pallet_sent = true;
                                                                        break;
                                                                    }
                                                                 }
+                                                                // if the transfer still is failing after 3 times
                                                                 if(!pallet_sent) {
                                                                     // if we have rerouting permission, try to find a new route
                                                                     if ((parsedRequest.get("reroute") != null) && (parsedRequest.get("reroute").equals("true"))) {
+                                                                        // sending a transfer message to itself with pathfinding request
                                                                         JSONObject newTransferRequestObj = new JSONObject();
                                                                         newTransferRequestObj.put("request_type", "transfer");
                                                                         newTransferRequestObj.put("source", myAgent.getLocalName());
@@ -286,26 +290,31 @@ public class ConveyorAgent extends Agent{
                                                         }
                                                     }
                                                 });
+                                                // exit from the loop that finds the agent in the route
                                                 break;
                                             }
                                         }
                                     }
-                                } else {
+                                }
+                                // if the pallet is not loaded
+                                else {
                                     reply.setPerformative(ACLMessage.FAILURE);
                                     reply.setContent("Cannot proceed, pallet not loaded");
                                     myLogger.log(Logger.WARNING, "Agent " + getLocalName() + " - Cannot proceed, pallet not loaded");
                                     send(reply);
                                 }
                             }
-                            //Transfer the pallet via the best path
+                            //Transfer the pallet via the best path, knowing only the source and the destination
                             else if ((content != null) && ((parsedRequest.get("request_type"))).equals("transfer")) {
                                 if (pallet_loaded) {
-                                    // add viaPoints array to parsedRequest
+                                    // add empty viaPoints array to parsedRequest
                                     JSONArray viaPoints = new JSONArray();
                                     parsedRequest.put("viaPoints", viaPoints);
                                     // call BestPath and transfer automatically after finding the route
                                     addBehaviour(new BestPath(myAgent, parsedRequest, myAgent.getAID(), true, true));
-                                } else {
+                                }
+                                // if the pallet is not loaded
+                                else {
                                     reply.setPerformative(ACLMessage.FAILURE);
                                     reply.setContent("Cannot proceed, pallet not loaded");
                                     myLogger.log(Logger.WARNING, "Agent " + getLocalName() + " - Cannot proceed, pallet not loaded");
@@ -318,29 +327,34 @@ public class ConveyorAgent extends Agent{
                                 send(reply);
                             }
                         } catch (ParseException e) {
-                            myLogger.log(Logger.INFO, "Agent " + getLocalName() + " Request not understood - received from " + msg.getSender().getLocalName());
+                            myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Request not understood - received from " + msg.getSender().getLocalName());
                             reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
                             reply.setContent("Request not understood");
                             //e.printStackTrace();
                             send(reply);
+                        } catch (NullPointerException e) {
+                            // exception that happens when the JSON message does not contain the right attributes
+                            myLogger.log(Logger.WARNING, "Agent " + getLocalName() + " - syntax error in message content");
+                            // e.printStackTrace();
                         }
 
                     }
+                    // either starting a Pathfinding or participating in a pathfinding
                     else if ((msg.getPerformative() == ACLMessage.CFP) || (msg.getPerformative() == ACLMessage.PROPAGATE)) {
                         try {
                             String content = msg.getContent();
                             JSONParser jsonParser = new JSONParser();
                             JSONObject jsonObject = (JSONObject) jsonParser.parse(content);
-
-                            addBehaviour(new BestPath(myAgent, jsonObject, msg.getSender(),(msg.getPerformative() == ACLMessage.CFP)));
+                            // start the BestPath behaviour. If the performative is CFP, then it's the first message (SOC = true)
+                            addBehaviour(new BestPath(myAgent, jsonObject, msg.getSender(), (msg.getPerformative() == ACLMessage.CFP)));
                             myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Received path finding request: " + jsonObject.toString());
                         } catch (ParseException e) {
                             e.printStackTrace();
                         }
 
                     }
+                    // if the performative is none of the above
                     else {
-//                        ACLMessage reply = new ACLMessage();
                         //myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - Unexpected message [" + ACLMessage.getPerformative(msg.getPerformative()) + "] received from "+msg.getSender().getLocalName());
                         reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
                         reply.setContent("( (Unexpected-act " + ACLMessage.getPerformative(msg.getPerformative()) + ") )");
@@ -349,6 +363,7 @@ public class ConveyorAgent extends Agent{
                 }
             }
             else {
+                // wait for a message to arrive
                 block();
             }
         }
@@ -367,7 +382,7 @@ public class ConveyorAgent extends Agent{
         try {
             DFService.register(this,dfd);
 
-            TransferControlBehaviour ConveyorBehaviour = new  TransferControlBehaviour(this);
+            TransferControlBehaviour ConveyorBehaviour = new TransferControlBehaviour(this);
             addBehaviour(ConveyorBehaviour);
 
         } catch (FIPAException e) {
@@ -381,7 +396,6 @@ public class ConveyorAgent extends Agent{
         // getting the neighbours and the transfer time from the args
         Object[] args = getArguments();
         if (args != null && args.length > 0) {
-
             for(int i = 0; i< ((Object[])args[0]).length; i++){
                 neighbours.add( ((Object[])args[0])[i].toString());
             }
@@ -396,11 +410,17 @@ public class ConveyorAgent extends Agent{
 
     // behaviour to ask look for the best path
     private class BestPath extends Behaviour {
-        JSONObject msg; //
+        // message containing the information about the path: source, destination and viaPoints
+        JSONObject msg;
+        // sender of the original message. Used to communicate the best path and instantiate transfer request
         AID sender = null;
-        private boolean isDone = false,
-                             SOC = false;
+        // internal variable for Done() method
+        private boolean isDone = false;
+        // StartOfCommunication flag. Distinguish between the original pathfinding request and the propagation of the message
+        private boolean SOC = false;
+        // flag to request for transfer after finding the best path
         private boolean transferAfterFindingRoute = false;
+
         public BestPath(Agent a, JSONObject s) {
             super(a);
             msg = s;
@@ -421,34 +441,24 @@ public class ConveyorAgent extends Agent{
             this.transferAfterFindingRoute = transferAfterFindingRoute;
         }
 
-        boolean timeoutElapsed = false;
+        // @unused variable for timeout
+//        boolean timeoutElapsed = false;
 
         public void action() {
             //Check the format of the message
-            if((msg.get("source") == null) || (msg.get("destination") == null) || (msg.get("viaPoints") == null)) {
-                myLogger.log(Logger.WARNING,myAgent.getLocalName()+" - Wrong format");
+            if ((msg.get("source") == null) || (msg.get("destination") == null) || (msg.get("viaPoints") == null)) {
+                myLogger.log(Logger.WARNING, myAgent.getLocalName() + " - Wrong format");
                 isDone = true;
                 return;
             }
 
 
-            // I am source
+            // Start of conversation: the received message is a CFP
             if (SOC) {
+                // If I am the source, I can proceed with the algorithm
                 if (msg.get("source").equals(myAgent.getLocalName())) {
-                    // if the viaPoints array is empty, we are done
                     // start timer
                     long timeoutMs = 1000L;
-                    timeoutElapsed = false;
-
-//                WakerBehaviour wakerBehaviour = new WakerBehaviour(myAgent, timeoutMs) {
-//                    @Override
-//                    protected void handleElapsedTimeout() {
-//                        timeoutElapsed = true;
-//                        myLogger.log(Logger.INFO, myAgent.getLocalName() + " - Timeout elapsed, it's time to take a look at the answers!");
-//                    }
-//                };
-//                addBehaviour(wakerBehaviour);
-//                wakerBehaviour.action();
 
                     // propagate message to neighbours
                     // add myself to viaPoints array
@@ -463,17 +473,24 @@ public class ConveyorAgent extends Agent{
                     // send the message
                     myAgent.send(propagateMsg);
 
-                    // wait for the messages and put them in a list
+                    // busy waiting for the incoming messages
                     List<JSONObject> messages = new ArrayList<>();
-
                     conveyor_status = Status.Busy;
+                    // WakerBehaviour didn't work
+//                  WakerBehaviour wakerBehaviour = new WakerBehaviour(myAgent, timeoutMs) {
+//                    @Override
+//                    protected void handleElapsedTimeout() {
+//                        timeoutElapsed = true;
+//                        myLogger.log(Logger.INFO, myAgent.getLocalName() + " - Timeout elapsed, it's time to take a look at the answers!");
+//                    }
+//                };
+//                addBehaviour(wakerBehaviour);
+//                wakerBehaviour.action();
                     long wakeUpTime = System.currentTimeMillis() + timeoutMs;
-
-
                     myLogger.log(Logger.INFO, myAgent.getLocalName() + " - Polling paths...");
-                    // receiving answers about paths
-//                while (!timeoutElapsed) {
+
                     while (System.currentTimeMillis() < wakeUpTime) {
+                        // filter only INFORM messages
                         MessageTemplate.MatchExpression recvMessage = aclMessage -> (aclMessage.getPerformative() == ACLMessage.INFORM);  // lambda expression D:
 
                         ACLMessage rec = myAgent.receive(new MessageTemplate(recvMessage));
@@ -508,10 +525,11 @@ public class ConveyorAgent extends Agent{
                                 minLength = pathLength;
                             }
                         }
-                        // best path found
+                        // best path found, if we know who is the sender, we inform it of the result
                         if (sender != null) {
                             ACLMessage pathFound = new ACLMessage();
                             pathFound.addReceiver(sender);
+                            // if requested, we ask the sender to start the transfer
                             if (transferAfterFindingRoute) {
                                 pathFound.setPerformative(ACLMessage.REQUEST);
                                 bestPath.replace("request_type", "routed_transfer");
@@ -529,7 +547,7 @@ public class ConveyorAgent extends Agent{
                     conveyor_status = Status.Idle;
                     isDone = true;
                 }
-                // SOC was sent to a CNV that is not the source
+                // SOC was sent to a CNV that is not the source, forward the message to the right agent
                 else {
                     ACLMessage forward = new ACLMessage(ACLMessage.CFP);
                     forward.setContent(msg.toString());
@@ -539,13 +557,8 @@ public class ConveyorAgent extends Agent{
                     isDone = true;
                 }
             }
-//            // I am the source but !SOC -> pathfinder is stuck in a loop
-//            else if (myAgent.getLocalName().equals(msg.get("source"))) {
-//                // we can end
-//                isDone = true;
-//            }
             // I am destination
-            else if ((myAgent.getLocalName()).equals(msg.get("destination"))) {
+            else if (msg.get("destination").equals(myAgent.getLocalName())) {
                 //Propagate only if the conveyor is idle, if not the path is not valid
                 if (((ConveyorAgent) myAgent).getConveyor_status() == Status.Idle) {
                     // destination cnv is added to viaPoints
@@ -555,15 +568,12 @@ public class ConveyorAgent extends Agent{
                     ACLMessage fullList = new ACLMessage(ACLMessage.INFORM);
                     // find target
                     AID targetAID = new AID((String) msg.get("source"), AID.ISLOCALNAME);
-                    // add receiver to message
-                    fullList.addReceiver(targetAID);
-                    // set the content
-                    fullList.setContent(msg.toString());
                     // send the message
+                    fullList.addReceiver(targetAID);
+                    fullList.setContent(msg.toString());
                     myAgent.send(fullList);
-                    // log
+
                     myLogger.log(Logger.INFO, myAgent.getLocalName() + " - I am the destination. Sending the full list to source.");
-                    // done
                     isDone = true;
                 }
             }
@@ -581,17 +591,13 @@ public class ConveyorAgent extends Agent{
                     ((JSONArray) msg.get("viaPoints")).add(myAgent.getLocalName());
                     // propagate the message
                     ACLMessage propagateMsg = new ACLMessage(ACLMessage.PROPAGATE);
-                    // add receivers to message
+                    // send the message to all the neighbours
                     for (String n : neighbours) {
                         propagateMsg.addReceiver(new AID(n, AID.ISLOCALNAME));
                     }
-                    // set the content
                     propagateMsg.setContent(msg.toString());
-                    // send the message
                     myAgent.send(propagateMsg);
-                    // log
                     myLogger.log(Logger.INFO, myAgent.getLocalName() + " - Adding myself to the list and propagating the message.");
-                    // done
                     isDone = true;
                 }
             }

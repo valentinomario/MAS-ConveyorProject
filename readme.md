@@ -119,64 +119,20 @@ telling the sniffer which agents to sniff must change accordingly.
 The Conveyor Agents are programmed to handle several types of commands,
 sent as ACL messages.
 
-  -----------------------------------------------------------------------------------
-  **Performative**   **request_type**   **Attributes**      **Description**
-  ------------------ ------------------ ------------------- -------------------------
-  REQUEST            get_info                               Sends back a message
-                                                            containing information
-                                                            about the status of the
-                                                            conveyor.
+ |Performative|request_type|Attributes|Description|
+|:----|:----|:----|:----|
+|REQUEST|get_info| |Sends back a message containing information about the status of the conveyor.|
+| |load| |Loads the conveyor with a pallet.|
+| |unload| |Unloads the conveyor if it is loaded.|
+| |set_status|status: {Idle, Busy, Down}|Sets the status of the conveyor.|
+| |routed_transfer|source|Requests the transfer of a pallet from the source conveyor to the destination conveyor, through the conveyors contained in the viaPoints array. If the reroute flag is set to true, then the conveyors will try to find alternative routes if the transfer fails.|
+| | |destination| |
+| | |viaPoints| |
+| | |reroute: {true, false}| |
+| |transfer|source|Finds the best path from the source conveyor to the destination conveyor and begins the transfer. If one of the conveyors on the path is busy or down, the system will try to attempt the transfer three times before searching for an alternative path.|
+| | |destination| |
+|CFP| |source|Tries to find the shortest path from the source conveyor to the destination conveyor.|
 
-                     load                                   Loads the conveyor with a
-                                                            pallet.
-
-                     unload                                 Unloads the conveyor if
-                                                            it is loaded.
-
-                     set_status         status: {Idle,      Sets the status of the
-                                        Busy, Down}         conveyor.
-
-                     routed_transfer    source              Requests the transfer of
-                                                            a pallet from the
-                                                            *source* conveyor to the
-                                                            *destination* conveyor,
-                                                            through the conveyors
-                                                            contained in the
-                                                            *viaPoints* array. If the
-                                                            *reroute* flag is set to
-                                                            true, then the conveyors
-                                                            will try to find
-                                                            alternative routes if the
-                                                            transfer fails.
-
-                                        destination         
-
-                                        viaPoints           
-
-                                        reroute: {true,     
-                                        false}              
-
-                     transfer           source              Finds the best path from
-                                                            the *source* conveyor to
-                                                            the *destination*
-                                                            conveyor and begins the
-                                                            transfer. If one of the
-                                                            conveyors on the path is
-                                                            busy or down, the system
-                                                            will try to attempt the
-                                                            transfer three times
-                                                            before searching for an
-                                                            alternative path.
-
-                                        destination         
-
-  CFP                                   source              Tries to find the
-                                                            shortest path from the
-                                                            *source* conveyor to the
-                                                            *destination* conveyor.
-
-                                        destination         
-  -----------------------------------------------------------------------------------
 
 The content of the ACL message must be a JSON object containing the
 fields as specified in the table. An example command can be found below.
