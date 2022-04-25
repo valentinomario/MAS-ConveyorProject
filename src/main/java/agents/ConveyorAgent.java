@@ -86,6 +86,7 @@ public class ConveyorAgent extends Agent{
                 if (msg.getPerformative() == ACLMessage.NOT_UNDERSTOOD ||
                          msg.getPerformative() == ACLMessage.AGREE ||
                         (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().contains("Transfer finished")) ||
+                        (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().contains("viaPoints")) ||
                          msg.getPerformative() == ACLMessage.FAILURE) {
                     // do nothing
                     // this check is done to prevent an infinite NOT_UNDERSTOOD loop conversation between two agents
@@ -303,7 +304,7 @@ public class ConveyorAgent extends Agent{
                             }
                             //Transfer the pallet via the best path, knowing only the source and the destination
                             else if ((content != null) && ((parsedRequest.get("request_type"))).equals("transfer")) {
-                                if (pallet_loaded) {
+                                if (pallet_loaded && parsedRequest.get("source").equals(myAgent.getLocalName())) {
                                     // add empty viaPoints array to parsedRequest
                                     JSONArray viaPoints = new JSONArray();
                                     parsedRequest.put("viaPoints", viaPoints);
@@ -313,7 +314,12 @@ public class ConveyorAgent extends Agent{
                                 // if the pallet is not loaded
                                 else {
                                     reply.setPerformative(ACLMessage.FAILURE);
-                                    reply.setContent("Cannot proceed, pallet not loaded");
+                                    if(parsedRequest.get("source").equals(myAgent.getLocalName())) {
+                                        reply.setContent("Cannot proceed, request sent to wrong agent");
+                                    }
+                                    else{
+                                        reply.setContent("Cannot proceed, pallet not loaded");
+                                    }
                                     myLogger.log(Logger.WARNING, "Agent " + getLocalName() + " - Cannot proceed, pallet not loaded");
                                     send(reply);
                                 }
